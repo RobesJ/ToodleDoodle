@@ -1,0 +1,13 @@
+# pip install -r ./requirements.txt
+
+fastapi[standart]
+sqlalchemy
+uvicorn
+dotenv
+pydantic
+pymysql
+cryptography
+pyjwt
+python-decouple
+passlib[bcrypt]
+python-multipart
