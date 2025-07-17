@@ -95,7 +95,6 @@ def get_db():
 
 security = HTTPBearer()
 
-
 @app.post("/register",response_model=schema.User)
 def post_user(user:schema.UserRegister, db:Session=Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
@@ -128,17 +127,15 @@ def login_user(user: schema.UserLogin, db:Session = Depends(get_db)):
         }
     }
 
-
 @app.get("/users/me", response_model=schema.User)
 def get_current_user_profile(current_user: models.User = Depends(get_current_user)):
     """Get current user's profile - JWT AUTHENTICATION REQUIRED"""
-    return current_user
+    return schema.User.from_orm(current_user)
 
 @app.get("/users/", response_model=list[schema.User])
 def get_users(skip:int=0, limit:int=0, db:Session=Depends(get_db), current_user: models.User = Depends(get_current_user)):
     users = crud.get_users(db,skip=skip,limit=limit)
     return users
-
 
 @app.get("/users/{user_id}/",response_model=schema.User)
 def get_user(user_id:int, db:Session=Depends(get_db)):
@@ -147,12 +144,12 @@ def get_user(user_id:int, db:Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-
-@app.post("/users/{user_id}/todos/",response_model=schema.Todo)
-def post_todo_for_user(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
+# create todo
+@app.post("/users/{user_id}/add-todo/",response_model=schema.Todo)
+def create_todo(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
     return crud.create_users_todo(db=db,user_id=user_id, todo=todo)
 
-
+# get todos of one user
 @app.get("/todos/", response_model=list[schema.Todo])
 def get_todos(skip:int=0,limit:int=100,db:Session=Depends(get_db)):
     todos = crud.get_todos(db,skip=skip,limit=limit)

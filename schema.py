@@ -6,14 +6,15 @@ class TodoBase(BaseModel):
     description : Optional[str] = None
 
 class TodoCreate(TodoBase):
-    pass
+    title : str
+    description : Optional[str] = None
 
 class Todo(TodoBase):
     id : int
     owner_id : int
 
     class Config:
-        from_attributes = True
+        orm_mode= True
 
 class UserBase(BaseModel):
     email : EmailStr
@@ -39,4 +40,4 @@ class User(UserBase):
     todos : List[Todo] = []
 
     class Config:
-        from_attributes = True
+        orm_mode = True

@@ -3,7 +3,6 @@
 fastapi[standart]
 sqlalchemy
 uvicorn
-dotenv
 pydantic
 pymysql
 cryptography

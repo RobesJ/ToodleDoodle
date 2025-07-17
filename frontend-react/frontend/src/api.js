@@ -25,3 +25,8 @@ export const authAPI = {
     register: (userData) => api.post("/register/", userData),
 };
 
+export const userAPI = {
+    getUser: () => api.get("/users/me"),
+    getUsersTodo: () => api.get("/todos"),
+    createTodo: (user_id) => api.get(`/users/${user_id}/add-todo`),
+};

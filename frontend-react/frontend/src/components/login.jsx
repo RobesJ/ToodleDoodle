@@ -1,5 +1,5 @@
 import React, {use, useEffect, useState} from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { authAPI } from "../api";
 import "./login.css"
 
@@ -8,7 +8,9 @@ const Login = () => {
         email: '',
         password: ''
     });
+
     const location = useLocation();
+    const navigate = useNavigate();
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState('');
@@ -22,6 +24,10 @@ const Login = () => {
         }
     }, [location]);
 
+    const handleSignUpClick = () => {
+        navigate("/register");
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -34,6 +40,7 @@ const Login = () => {
                 localStorage.setItem("access_token", response.data.access_token);
                 setSuccess("Login successful!");
                 console.log("Response status: ",response.status)
+                navigate("/user_page");
             }
             else{
                 console.log("No access_token in response");
@@ -75,6 +82,16 @@ const Login = () => {
                 <div className="button">
                     <button type="submit" disabled={loading}>
                     {loading ? 'Logging in...' : 'Login'}
+                    </button>
+                </div>
+                <div className="signUp-link">
+                    Don't have an account? 
+                    <button
+                      type="button" 
+                      onClick={handleSignUpClick}
+                      className="link-button"
+                    >
+                      Sign up here
                     </button>
                 </div>
             </div>
