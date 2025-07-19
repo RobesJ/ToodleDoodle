@@ -39,8 +39,10 @@ const Login = () => {
             if(response.data && response.data.access_token) {
                 localStorage.setItem("access_token", response.data.access_token);
                 setSuccess("Login successful!");
-                console.log("Response status: ",response.status)
-                navigate("/user_page");
+                //setTimeout(() => {
+                    navigate("/user_page");
+                //}, 2000);
+
             }
             else{
                 console.log("No access_token in response");
