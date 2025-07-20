@@ -27,6 +27,6 @@ export const authAPI = {
 
 export const userAPI = {
     getUser: () => api.get("/users/me"),
-    getUsersTodo: () => api.get("/todos"),
-    createTodo: (user_id) => api.get(`/users/${user_id}/add-todo`),
+    getUsersTodo: (user_id) => api.get(`/users/${user_id}/todos/`),
+    createTodo: (user_id, todoData) => api.post(`/users/${user_id}/add-todo`,todoData),
 };

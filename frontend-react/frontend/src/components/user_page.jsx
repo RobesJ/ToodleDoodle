@@ -6,27 +6,37 @@ import "./user_page.css"
 const UserPage = () => {
 
     const [todos, setTodos] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [todoTitle, setTodoTitle] = useState("");
+    const [todoDesc, setTodoDesc] = useState("");
+    const [todoStatus, setTodoStatus] = useState("");
+    const [todoDue, setTodoDue] = useState("");
+    const [showPopUp, setShowPopUp] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const [loading, setLoading] = useState(true);
     const [success, setSuccess] = useState('');
-    const [currentUser, setCurrentUser] = useState(null);
 
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
-            console.log("fetch user data is running")
+            console.log("fetch user data is running");
             try{
                 const user = await userAPI.getUser();
                 setCurrentUser(user.data);
                 console.log(user.data);
-                const todos = await userAPI.getUsersTodo();
+                const todos = await userAPI.getUsersTodo(user.data.id);
                 console.log(todos);
                 setTodos(todos.data);
             }
             catch (err){
                 setError (err.message);
+                console.log(error);
+                const status = err.response?.status;
+                if(status == 403 || status == 401){
+                    navigate("/login");
+                };
             }
         };
         fetchUserData();
@@ -42,8 +52,36 @@ const UserPage = () => {
         navigate("/login");
        }
     
-    const handleAddingTodo = () => {
-        userAPI.createTodo(currentUser.name);
+    const handleCreatingTodo = async (e) => {
+        e.preventDefault();
+        try{
+            const todoData = {
+                title: todoTitle,
+                description: todoDesc,
+                status: todoStatus,
+                due_date: todoDue
+            }
+            console.log("Sending todoData:", todoData);
+            const newTodo = await userAPI.createTodo(currentUser.id, todoData);
+            setLoading(true);
+            console.log("New todo: ", newTodo);
+            setTodos(prevTodos => [...prevTodos, newTodo.data]); // append new todo to list of todos
+
+            setTodoDesc("");
+            setTodoTitle("");
+            setTodoStatus("");
+            setTodoDue("");
+            setShowPopUp(false);
+            setError("");
+            setLoading(false);
+        }
+        catch (err){
+            console.log(err.message);
+            setError(err.message);
+        }
+        //finally {
+        //    fetchUserData();
+        //}
     }
 
     // show message while fetching user data
@@ -59,21 +97,30 @@ const UserPage = () => {
                 <div className="user-page">
 
                     <div className="header">
-                    <button
-                        type="button" 
-                        onClick={handleLogout}
-                        className="logout-button"
-                    >
+                    <button type="button" onClick={handleLogout} className="logout-button">
                         Logout
                     </button>
-                    <button
-                        type="button" 
-                        onClick={handleAddingTodo}
-                        className="add-todo-button"
-                    >
+                    <button type="button" onClick={() => setShowPopUp(true)} className="add-todo-button">
                         Create New Todo
                     </button>
                     </div>
+
+                    {showPopUp && (
+                      <div className="modal-overlay">
+                        <div className="modal-content">
+                          <h3>Add New Todo</h3>
+                          <form>
+                            <input type="text" placeholder="Todo title" value={todoTitle} onChange={(e) => setTodoTitle(e.target.value)} required/>
+                            <textarea placeholder="Todo description" value={todoDesc} onChange={(e) => setTodoDesc(e.target.value)}></textarea>
+                            <input type="text" placeholder="Status" value={todoStatus} onChange={(e) => setTodoStatus(e.target.value)}/>
+                            <input type="date" value={todoDue} onChange={(e) => setTodoDue(e.target.value)}/>
+                            <button type="submit" onClick={handleCreatingTodo}>{loading ? "Creating Todo..." : "Save"}</button>
+                            <button type="button" onClick={() => {setShowPopUp(false); setTodoTitle("");setTodoDesc("")}}>Cancel</button>
+                          </form>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="todos-section">
                         <h2>Hi {currentUser.name}, here are your Todos</h2>
 

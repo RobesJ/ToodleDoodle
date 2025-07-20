@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey,Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey,Integer, String, DATETIME, Date, func
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -17,6 +17,8 @@ class Todo(Base):
     title = Column(String(50), index=True)
     description = Column(String(255), index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
+    status = Column(String(100), index= True)
+    created_at = Column(DATETIME, index=True, default=func.now())
+    due_date = Column(Date, index=True)
 
     owner = relationship("User", back_populates="todos")
-

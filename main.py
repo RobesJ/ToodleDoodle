@@ -147,10 +147,10 @@ def get_user(user_id:int, db:Session=Depends(get_db)):
 # create todo
 @app.post("/users/{user_id}/add-todo/",response_model=schema.Todo)
 def create_todo(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
-    return crud.create_users_todo(db=db,user_id=user_id, todo=todo)
+    return crud.create_users_todo(db=db, user_id= user_id, todo=todo)
 
 # get todos of one user
-@app.get("/todos/", response_model=list[schema.Todo])
-def get_todos(skip:int=0,limit:int=100,db:Session=Depends(get_db)):
-    todos = crud.get_todos(db,skip=skip,limit=limit)
+@app.get("/users/{user_id}/todos/", response_model=list[schema.Todo])
+def get_todos(user_id: int, skip:int=0,limit:int=100,db:Session=Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    todos = crud.get_todos(db, user_id= user_id, skip= skip,limit= limit)
     return todos

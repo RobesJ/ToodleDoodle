@@ -32,12 +32,14 @@ def authenticate_user(db: Session, email: str, password: str):
         return False
     return user
 
-def get_todos(db: Session, skip: int=0, limit: int=100):
-    return db.query(models.Todo).offset(skip).limit(limit).all()
+def get_todos(db: Session, user_id: int, skip: int=0, limit: int=100):
+    return db.query(models.Todo).filter(models.Todo.owner_id == user_id).offset(skip).limit(limit).all()
 
 def create_users_todo(db: Session, todo:schema.TodoCreate, user_id: int):
     db_todo = models.Todo(title = todo.title,
                           description = todo.description,
+                          status = todo.status,
+                          due_date = todo.due_date,
                           owner_id=user_id)
     db.add(db_todo)
     db.commit()

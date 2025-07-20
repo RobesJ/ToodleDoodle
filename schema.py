@@ -1,13 +1,18 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
+from datetime import date
 
 class TodoBase(BaseModel):
     title : str
     description : Optional[str] = None
+    status: Optional[str] = None
+    due_date: Optional[date] = None
 
 class TodoCreate(TodoBase):
     title : str
     description : Optional[str] = None
+    status: Optional[str] = None
+    due_date: Optional[date] = None
 
 class Todo(TodoBase):
     id : int

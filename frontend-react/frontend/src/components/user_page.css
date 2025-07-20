@@ -1,3 +1,20 @@
 body{
     background-color: aliceblue;
 }
+
+.modal-overlay{
+    position: fixed;
+    width: 800px;
+    height: 500px;
+    display: flex;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(200, 200, 200);
+}
+
+.modal-conten{
+    background: white;
+    padding: 20px;
+    margin-bottom: 30px;
+}
