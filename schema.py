@@ -14,6 +14,12 @@ class TodoCreate(TodoBase):
     status: Optional[str] = None
     due_date: Optional[date] = None
 
+class UpdateTodo(TodoBase):
+    title : Optional[str] = None
+    description : Optional[str] = None
+    status: Optional[str] = None
+    due_date: Optional[date] = None
+
 class Todo(TodoBase):
     id : int
     owner_id : int

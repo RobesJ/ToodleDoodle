@@ -7,6 +7,7 @@ const UserPage = () => {
 
     const [todos, setTodos] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [chosenTodo, setChosenTodo] = useState(null)
     const [todoTitle, setTodoTitle] = useState("");
     const [todoDesc, setTodoDesc] = useState("");
     const [todoStatus, setTodoStatus] = useState("");
@@ -14,9 +15,6 @@ const UserPage = () => {
     const [showPopUp, setShowPopUp] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-    const [success, setSuccess] = useState('');
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -50,8 +48,17 @@ const UserPage = () => {
         localStorage.removeItem("access_token");
         setCurrentUser(null); 
         navigate("/login");
-       }
+    }
     
+    const handleEditTodo = (todo) => {
+        setChosenTodo(todo);
+        setTodoDesc(() => (!todo.description ? "" : todo.description));
+        setTodoTitle(todo.title);
+        setTodoStatus(() => (todo.status == null ? "" : todo.status));
+        setTodoDue(() => (todo.due_date == null ? "" : todo.due_date));
+        setShowPopUp(true);
+    }
+
     const handleCreatingTodo = async (e) => {
         e.preventDefault();
         try{
@@ -65,6 +72,7 @@ const UserPage = () => {
             const newTodo = await userAPI.createTodo(currentUser.id, todoData);
             setLoading(true);
             console.log("New todo: ", newTodo);
+
             setTodos(prevTodos => [...prevTodos, newTodo.data]); // append new todo to list of todos
 
             setTodoDesc("");
@@ -79,9 +87,38 @@ const UserPage = () => {
             console.log(err.message);
             setError(err.message);
         }
-        //finally {
-        //    fetchUserData();
-        //}
+    }
+
+    const updateTodo = async (e) => {
+        e.preventDefault();
+        // get choosen Todo and show the data in popUp window, probaly get it from some event
+        try{
+        updateData = {
+            title: todoTitle,
+            description: todoDesc,
+            status: todoStatus,
+            due_date: todoDue
+        }
+        const updatedTodo = await userAPI.updateTodo(currentUser.id, chosenTodo.id, updateData);
+        
+        setTodos(prevTodos =>
+            prevTodos.map(todo =>
+                todo.id == chosenTodo.id ? updatedTodo.data : todo
+            )
+        );
+
+        setTodoDesc("");
+        setTodoTitle("");
+        setTodoStatus("");
+        setTodoDue("");
+        setShowPopUp(false);
+        setError("");
+        setLoading(false);
+        }
+        catch (err){
+            console.log(err.message);
+            setError(err.message);
+        }
     }
 
     // show message while fetching user data
@@ -130,7 +167,7 @@ const UserPage = () => {
                         ) : (
                             <ul className="todos-list">
                                 {todos.map((todo) => (
-                                    <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+                                    <li key={todo.id} className={`todo-item ${todo.status ? 'completed' : ''}`}>
                                         <div className="todo-content">
                                             <h3 className="todo-title">{todo.title}</h3>
                                 
@@ -138,14 +175,19 @@ const UserPage = () => {
                                                 <p className="todo-description">{todo.description}</p>
                                             )}
                                             <div className="todo-meta">
-                                                <span className={`todo-status ${todo.completed ? 'completed' : 'pending'}`}>
-                                                    {todo.completed ? 'Completed' : 'Pending'}
+                                                <span className={`todo-status ${todo.status ? todo.status: 'completed' }`}>
+                                                    {todo.status ? todo.status: 'completed' }
                                                 </span>
                                                 {todo.created_at && (
-                                                    <span className="todo-date">
-                                                        Created: {new Date(todo.created_at).toLocaleDateString()}
+                                                <span className="todo-date">
+                                                    Created: {new Date(todo.created_at).toLocaleDateString()}
                                                     </span>
                                                 )}
+                                            </div>
+                                            <div className="todo-actions">
+                                                <button onClick={() => handleEditTodo(todo)} className="edit-button">
+                                                    Edit
+                                                </button>
                                             </div>
                                         </div>
                                     </li>

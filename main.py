@@ -1,61 +1,4 @@
-
 '''
-
-class Student(BaseModel):
-    name : str
-    age : int
-    attented_class : str
-
-class UpdateStudent(BaseModel):
-    name : Optional[str] = None
-    age : Optional[int] = None
-    attented_class : Optional[str] = None
-
-students = {
-    1: {
-        "name" : "Michal Mysiak",
-        "age" : "22",
-        "attented_class" : "Unknown"
-    }
-}
-
-@app.get("/students/get-by-name")
-async def get_student_by_name(name: Optional[str] = None):
-    for student_id in students:
-        if students[student_id]["name"] == name:
-            return students[student_id]
-
-    raise HTTPException(status_code=404, detail=f"There is no student with name {name}")
-
-
-@app.get("/students/{student_id}")
-async def get_student(student_id: int = Path(description="ID of the student you want to view", gt=0)): #gt = greater then 0
-    if student_id not in students:
-        raise HTTPException(status_code= 404, detail="Student not found") 
-    return students[student_id]
-
-@app.post("/students/create/{student_id}")
-async def create_student(student_id: int, student: Student):
-    if student_id in students:
-        return {"Error" : "Student with this id already exists"}
-    students[student_id] = student.model_dump()
-    return students[student_id]
-
-@app.put("/students/update/{student_id}")
-async def update_student(student_id: int, student: UpdateStudent):
-    if student_id not in students:
-        return {"Error" : "Student with this id does not exist"}
-    
-    existing_student = students[student_id]
-
-    update_data = student.model_dump(exclude_unset=True)
-
-    for key, value in update_data.items():
-        existing_student[key] = value
-    
-    students[student_id] = existing_student
-    return students[student_id]
-
 @app.delete("/students/delete/{student_id}")
 async def delete_student(student_id: int):
     if student_id not in students:
@@ -144,13 +87,25 @@ def get_user(user_id:int, db:Session=Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-# create todo
-@app.post("/users/{user_id}/add-todo/",response_model=schema.Todo)
-def create_todo(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
-    return crud.create_users_todo(db=db, user_id= user_id, todo=todo)
-
 # get todos of one user
 @app.get("/users/{user_id}/todos/", response_model=list[schema.Todo])
 def get_todos(user_id: int, skip:int=0,limit:int=100,db:Session=Depends(get_db), current_user: models.User = Depends(get_current_user)):
     todos = crud.get_todos(db, user_id= user_id, skip= skip,limit= limit)
     return todos
+
+# create todo
+@app.post("/users/{user_id}/add-todo/",response_model=schema.Todo)
+def create_todo(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
+    return crud.create_users_todo(db = db, user_id = user_id, todo = todo)
+
+
+@app.put("/users/{user_id}/todos/{todo_id}", response_model=schema.Todo)
+def update_todo(user_id: int, todo_id: int, todo:schema.UpdateTodo, db:Session=Depends(get_db)):
+    updated_todo = crud.update_todo(db = db, todo_id = todo_id, user_id = user_id, todo_to_update = todo)
+
+    if not updated_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo not found or you dont have permission to modify it"
+        )
+    return updated_todo
