@@ -26,6 +26,7 @@ class Todo(TodoBase):
 
     class Config:
         orm_mode= True
+        
 
 class UserBase(BaseModel):
     email : EmailStr

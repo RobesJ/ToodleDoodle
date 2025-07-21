@@ -29,5 +29,6 @@ export const userAPI = {
     getUser: () => api.get("/users/me"),
     getUsersTodo: (user_id) => api.get(`/users/${user_id}/todos/`),
     createTodo: (user_id, todoData) => api.post(`/users/${user_id}/add-todo`,todoData),
-    updateTodo: (user_id, todo_id, updateData) => api.put(`/users/${user_id}/add-todo/${todo_id}`, updateData),
+    updateTodo: (user_id, todo_id, updateData) => api.put(`/users/${user_id}/todos/${todo_id}`, updateData),
+    deleteTodo: (user_id, todo_id, successMessage) => api.delete(`/users/${user_id}/todos/${todo_id}`,successMessage),
 };

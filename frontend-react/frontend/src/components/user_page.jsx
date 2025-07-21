@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { userAPI} from "../api";
 import "./user_page.css"
 
@@ -15,17 +15,25 @@ const UserPage = () => {
     const [showPopUp, setShowPopUp] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState ('');
+    const [editMode, setEditMode] = useState(false);
     const navigate = useNavigate();
+
+    const updateUrlForTodo = (userId, todoId) => {
+        // Update URL to show todo context without navigating away from UserPage
+        const newUrl = `/users/${userId}todos/${todoId}`; // or `/user_page?todo=${todoId}`
+        window.history.replaceState({ userId, todoId }, '', newUrl);
+    };
 
     useEffect(() => {
         const fetchUserData = async () => {
-            console.log("fetch user data is running");
+            //console.log("fetch user data is running");
             try{
                 const user = await userAPI.getUser();
                 setCurrentUser(user.data);
-                console.log(user.data);
+                //console.log(user.data);
                 const todos = await userAPI.getUsersTodo(user.data.id);
-                console.log(todos);
+                //console.log(todos);
                 setTodos(todos.data);
             }
             catch (err){
@@ -49,25 +57,47 @@ const UserPage = () => {
         setCurrentUser(null); 
         navigate("/login");
     }
-    
+
+    const handleCancelFunction = () => {
+        setChosenTodo(null);
+        setTodoDesc("");
+        setTodoTitle("");
+        setTodoStatus("");
+        setTodoDue("");
+        setShowPopUp(false);
+        setEditMode(false);
+        setLoading(false);
+        setError("");
+        window.history.replaceState({ userId: currentUser.id }, '', '/user_page');
+    }
+
     const handleEditTodo = (todo) => {
         setChosenTodo(todo);
-        setTodoDesc(() => (!todo.description ? "" : todo.description));
+        setTodoDesc(todo.description || "");
         setTodoTitle(todo.title);
-        setTodoStatus(() => (todo.status == null ? "" : todo.status));
-        setTodoDue(() => (todo.due_date == null ? "" : todo.due_date));
+        setTodoStatus(todo.status || "");
+        setTodoDue(todo.due_date || "");
         setShowPopUp(true);
+        setEditMode(true);
+        updateUrlForTodo(currentUser.id,todo.id);
     }
 
     const handleCreatingTodo = async (e) => {
         e.preventDefault();
         try{
-            const todoData = {
-                title: todoTitle,
-                description: todoDesc,
-                status: todoStatus,
-                due_date: todoDue
+            const todoData = {};
+            if (todoTitle.trim() == ""){
+                console.error("Title is required field");
+                setError("Title is required field");
+                return;
             }
+            else{
+                todoData.title = todoTitle;
+            };
+            todoDesc.trim()   == "" ? todoData.description = null : todoData.description = todoDesc;
+            todoStatus.trim() == "" ? todoData.status      = null : todoData.status = todoStatus;
+            todoDue.trim()    == "" ? todoData.due_date    = null : todoData.due_date = todoDue;
+
             console.log("Sending todoData:", todoData);
             const newTodo = await userAPI.createTodo(currentUser.id, todoData);
             setLoading(true);
@@ -75,13 +105,7 @@ const UserPage = () => {
 
             setTodos(prevTodos => [...prevTodos, newTodo.data]); // append new todo to list of todos
 
-            setTodoDesc("");
-            setTodoTitle("");
-            setTodoStatus("");
-            setTodoDue("");
-            setShowPopUp(false);
-            setError("");
-            setLoading(false);
+            handleCancelFunction();
         }
         catch (err){
             console.log(err.message);
@@ -89,34 +113,60 @@ const UserPage = () => {
         }
     }
 
-    const updateTodo = async (e) => {
-        e.preventDefault();
-        // get choosen Todo and show the data in popUp window, probaly get it from some event
+    const handleDeleteTodo = async (todo) => {
         try{
-        updateData = {
-            title: todoTitle,
-            description: todoDesc,
-            status: todoStatus,
-            due_date: todoDue
+            const message = await userAPI.deleteTodo(currentUser.id, todo.id);
+            setSuccess(message);
+            // Filter out the deleted todo from the list
+            setTodos(prevTodos => prevTodos.filter(t => t.id !== todo.id));
+        }    
+        catch (err){
+            console.error("Update error:", err);
+            console.error("Error response:", err.response);
+            setError(err.message);
         }
-        const updatedTodo = await userAPI.updateTodo(currentUser.id, chosenTodo.id, updateData);
-        
-        setTodos(prevTodos =>
-            prevTodos.map(todo =>
-                todo.id == chosenTodo.id ? updatedTodo.data : todo
-            )
-        );
+    }
 
-        setTodoDesc("");
-        setTodoTitle("");
-        setTodoStatus("");
-        setTodoDue("");
-        setShowPopUp(false);
-        setError("");
-        setLoading(false);
+    const handleUpdateTodo = async (e) => {
+        e.preventDefault();
+        
+        if (!chosenTodo) {
+            console.error("No todo selected for update");
+            setError("No todo selected for update");
+            return;
+        }
+
+        try{
+            const updateData = {};
+
+            if (todoTitle.trim() == ""){
+                console.error("Title is required field");
+                setError("Title is required field");
+                return;
+            }
+            else{
+                updateData.title = todoTitle;
+            };
+            todoDesc.trim()   == "" ? updateData.description = null : updateData.description = todoDesc;
+            todoStatus.trim() == "" ? updateData.status      = null : updateData.status = todoStatus;
+            todoDue.trim()    == "" ? updateData.due_date    = null : updateData.due_date = todoDue;
+        
+            console.log("Update Data:", updateData);
+
+            const updatedTodo = await userAPI.updateTodo(currentUser.id, chosenTodo.id, updateData);
+           
+            //update todo in the UI
+            setTodos(prevTodos =>
+                prevTodos.map(todo =>
+                    todo.id == chosenTodo.id ? updatedTodo.data : todo
+                )
+            );
+
+            handleCancelFunction();
         }
         catch (err){
-            console.log(err.message);
+            console.error("Update error:", err);
+            console.error("Error response:", err.response);
             setError(err.message);
         }
     }
@@ -137,7 +187,7 @@ const UserPage = () => {
                     <button type="button" onClick={handleLogout} className="logout-button">
                         Logout
                     </button>
-                    <button type="button" onClick={() => setShowPopUp(true)} className="add-todo-button">
+                    <button type="button" onClick={() => {setShowPopUp(true); setEditMode(false);}} className="add-todo-button">
                         Create New Todo
                     </button>
                     </div>
@@ -151,8 +201,8 @@ const UserPage = () => {
                             <textarea placeholder="Todo description" value={todoDesc} onChange={(e) => setTodoDesc(e.target.value)}></textarea>
                             <input type="text" placeholder="Status" value={todoStatus} onChange={(e) => setTodoStatus(e.target.value)}/>
                             <input type="date" value={todoDue} onChange={(e) => setTodoDue(e.target.value)}/>
-                            <button type="submit" onClick={handleCreatingTodo}>{loading ? "Creating Todo..." : "Save"}</button>
-                            <button type="button" onClick={() => {setShowPopUp(false); setTodoTitle("");setTodoDesc("")}}>Cancel</button>
+                            <button type="submit" onClick={editMode ? handleUpdateTodo : handleCreatingTodo}>{loading ? "Creating Todo..." : "Save"}</button>
+                            <button type="button" onClick={handleCancelFunction}>Cancel</button>
                           </form>
                         </div>
                       </div>
@@ -187,6 +237,9 @@ const UserPage = () => {
                                             <div className="todo-actions">
                                                 <button onClick={() => handleEditTodo(todo)} className="edit-button">
                                                     Edit
+                                                </button>
+                                                <button onClick={() => handleDeleteTodo(todo)} className="delete-button">
+                                                    Delete
                                                 </button>
                                             </div>
                                         </div>

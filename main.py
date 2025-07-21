@@ -109,3 +109,15 @@ def update_todo(user_id: int, todo_id: int, todo:schema.UpdateTodo, db:Session=D
             detail="Todo not found or you dont have permission to modify it"
         )
     return updated_todo
+
+@app.delete("/users/{user_id}/todos/{todo_id}")
+def delete_todo(user_id: int, todo_id: int, db:Session=Depends(get_db)):
+    deletion = crud.delete_todo(db = db, todo_id = todo_id, user_id = user_id)
+
+    if  not deletion:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo not found or you don't have permission to delete it"
+        )
+
+    return {"message": "Todo deleted successfully"}

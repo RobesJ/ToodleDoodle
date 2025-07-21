@@ -60,3 +60,13 @@ def update_todo(db:Session, todo_id: int, todo_to_update:schema.UpdateTodo, user
     db.commit()
     db.refresh(db_todo)
     return db_todo
+
+def delete_todo(db:Session, todo_id: int, user_id: int):
+    db_todo = db.query(models.Todo).filter(models.Todo.id == todo_id, models.Todo.owner_id == user_id).first()
+
+    if not db_todo:
+        return None
+    
+    db.delete(db_todo)
+    db.commit()
+    return True
