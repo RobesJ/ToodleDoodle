@@ -21,7 +21,7 @@ const UserPage = () => {
 
     const updateUrlForTodo = (userId, todoId) => {
         // Update URL to show todo context without navigating away from UserPage
-        const newUrl = `/users/${userId}todos/${todoId}`; // or `/user_page?todo=${todoId}`
+        const newUrl = `/users/${userId}todos/${todoId}`;
         window.history.replaceState({ userId, todoId }, '', newUrl);
     };
 
@@ -184,11 +184,9 @@ const UserPage = () => {
                 <div className="user-page">
 
                     <div className="header">
+                    <h1 className="brand-name">CreaDo</h1>
                     <button type="button" onClick={handleLogout} className="logout-button">
                         Logout
-                    </button>
-                    <button type="button" onClick={() => {setShowPopUp(true); setEditMode(false);}} className="add-todo-button">
-                        Create New Todo
                     </button>
                     </div>
 
@@ -209,8 +207,12 @@ const UserPage = () => {
                     )}
 
                     <div className="todos-section">
+                        <div className="todos-section-header">
                         <h2>Hi {currentUser.name}, here are your Todos</h2>
-
+                        <button type="button" onClick={() => {setShowPopUp(true); setEditMode(false);}} className="add-todo-button">
+                            Create Todo
+                        </button>
+                        </div>
 
                         {todos.length === 0 ? (
                             <p className="no-todos">No todos yet. Start by adding one!</p>
@@ -219,27 +221,25 @@ const UserPage = () => {
                                 {todos.map((todo) => (
                                     <li key={todo.id} className={`todo-item ${todo.status ? 'completed' : ''}`}>
                                         <div className="todo-content">
-                                            <h3 className="todo-title">{todo.title}</h3>
-                                
-                                            {todo.description && (
-                                                <p className="todo-description">{todo.description}</p>
-                                            )}
-                                            <div className="todo-meta">
-                                                <span className={`todo-status ${todo.status ? todo.status: 'completed' }`}>
-                                                    {todo.status ? todo.status: 'completed' }
-                                                </span>
-                                                {todo.created_at && (
-                                                <span className="todo-date">
-                                                    Created: {new Date(todo.created_at).toLocaleDateString()}
+                                            <div className="todo-left-section">
+                                                <h3 className="todo-title">{todo.title}</h3>
+                                                <div className="todo-meta">
+                                                    <span className={`todo-status ${todo.status ? todo.status: 'completed' }`}>
+                                                        {todo.status ? todo.status: 'completed' }
                                                     </span>
-                                                )}
+                                                    {todo.created_at && (
+                                                        <span className="todo-date">
+                                                            Due: {todo.due_date}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div className="todo-actions">
                                                 <button onClick={() => handleEditTodo(todo)} className="edit-button">
-                                                    Edit
+                                                   [ Edit ]
                                                 </button>
                                                 <button onClick={() => handleDeleteTodo(todo)} className="delete-button">
-                                                    Delete
+                                                   [ Delete ]
                                                 </button>
                                             </div>
                                         </div>

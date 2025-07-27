@@ -59,7 +59,8 @@ const Login = () => {
     };
 
     return (
-        <div>
+        <div className="login-container">
+        <div className="login-page">
           <h2>Login</h2>
           <form onSubmit={handleSubmit}>
             <div className="container">
@@ -101,6 +102,11 @@ const Login = () => {
           {success && <p style={{ color: 'green', marginTop: '10px' }}>{success}</p>}
           {error && <p style={{color: 'red'}}>{error}</p>}
         </div>
+        <div className="brand-section">
+            <h1 className="brand-name">CreaDo</h1>
+            <p className="brand-tagline">Create. Organize. Achieve.</p>
+        </div>
+    </div>
     );
 };
 

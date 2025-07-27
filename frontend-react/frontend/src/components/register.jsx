@@ -87,7 +87,8 @@ const Register = () => {
     };
 
     return (
-        <div>
+        <div className="register-container">
+        <div className="register-page">
           <h2>Sign Up</h2>
           <form onSubmit={handleSubmit}>
           <div className="container">
@@ -135,7 +136,12 @@ const Register = () => {
             </div>
           </form>
           {error && <p style={{color: 'red'}}>{error}</p>}
+          </div>
+          <div className="brand-section">
+            <h1 className="brand-name">CreaDo</h1>
+            <p className="brand-tagline">Create. Organize. Achieve.</p>
         </div>
+    </div>
     );
 };
 

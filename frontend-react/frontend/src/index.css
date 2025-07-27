@@ -2,98 +2,29 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
-:root {
+*{
+  margin:0;
+  padding:0;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
   font-family: 'Poppins', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #fff;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 600;
-  text-decoration: inherit;
-}
-
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  justify-content: center;
   background: 
     radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 40% 40%, rgba(120, 200, 255, 0.3) 0%, transparent 50%),
     linear-gradient(135deg, #5b857f 0%, #2d4240 50%, #000 100%);
-  min-width: 320px;
-  min-height: 100vh;
-  animation: backgroundPulse 8s ease-in-out infinite;
-  position: relative;
-}
-
-body::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  animation: breathe 4s ease-in-out infinite;
-  pointer-events: none;
-}
-
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-  color: #535bf2;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-}
-
-h2 {
-  color: #ffffff;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  text-shadow: 
-    0 0 10px rgba(91, 133, 127, 0.5),
-    0 0 20px rgba(91, 133, 127, 0.3);
-}
-
-/* Floating particles animation */
-body::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.2), transparent),
-    radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.4), transparent),
-    radial-gradient(1px 1px at 130px 80px, rgba(255, 255, 255, 0.3), transparent),
-    radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.2), transparent);
-  background-repeat: repeat;
-  background-size: 100px 100px;
-  animation: sparkle 20s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes sparkle {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-200px); }
+  background-attachment: fixed;
+  overflow-x: hidden;
 }

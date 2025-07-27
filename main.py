@@ -1,13 +1,3 @@
-'''
-@app.delete("/students/delete/{student_id}")
-async def delete_student(student_id: int):
-    if student_id not in students:
-        return {"Error" : "Student with this id does not exist"}
-    del students[student_id]
-    return {"Info" : f"Student with id {student_id} was deleted"}
-
-'''
-
 from . import crud, models, schema
 from .database import SessionLocal, engine
 from fastapi import FastAPI, Depends, HTTPException, status, Path
@@ -93,15 +83,15 @@ def get_todos(user_id: int, skip:int=0,limit:int=100,db:Session=Depends(get_db),
     todos = crud.get_todos(db, user_id= user_id, skip= skip,limit= limit)
     return todos
 
-# create todo
+# create users todo
 @app.post("/users/{user_id}/add-todo/",response_model=schema.Todo)
 def create_todo(user_id:int, todo:schema.TodoCreate, db:Session=Depends(get_db)):
     return crud.create_users_todo(db = db, user_id = user_id, todo = todo)
 
 
 @app.put("/users/{user_id}/todos/{todo_id}", response_model=schema.Todo)
-def update_todo(user_id: int, todo_id: int, todo:schema.UpdateTodo, db:Session=Depends(get_db)):
-    updated_todo = crud.update_todo(db = db, todo_id = todo_id, user_id = user_id, todo_to_update = todo)
+def update_todo(user_id: int, todo_id: int, todo:schema.TodoUpdate, db:Session=Depends(get_db)):
+    updated_todo = crud.update_users_todo(db = db, todo_id = todo_id, user_id = user_id, todo_to_update = todo)
 
     if not updated_todo:
         raise HTTPException(
@@ -121,3 +111,47 @@ def delete_todo(user_id: int, todo_id: int, db:Session=Depends(get_db)):
         )
 
     return {"message": "Todo deleted successfully"}
+
+
+# get all personal projects
+@app.get("/users/{user_id}/projects/", response_model=list[schema.Project])
+def get_personal_projects(user_id: int, skip:int=0,limit:int=100,db:Session=Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    projects = crud.get_personal_projects(db, user_id= user_id, skip= skip,limit= limit)
+    return projects
+
+# create personal project
+@app.post("/users/{user_id}/add-project/",response_model=schema.Project)
+def create_personal_project(user_id:int, project:schema.ProjectCreate, db:Session=Depends(get_db)):
+    return crud.create_personal_project(db = db, user_id = user_id, project = project)
+
+
+# create users todo
+@app.post("/users/{user_id}/projects/{project_id}/add-todo/",response_model=schema.Todo)
+def create_projects_todo(user_id: int, project_id: int,  todo:schema.TodoCreate, db:Session=Depends(get_db)):
+    return crud.create_users_todo(db = db, user_id = user_id, project_id = project_id, todo = todo)
+
+
+@app.put("/users/{user_id}//projects/{project_id}/todos/{todo_id}", response_model=schema.Todo)
+def update_projects_todo(user_id: int, todo_id: int, project_id: int, todo:schema.TodoUpdate, db:Session=Depends(get_db)):
+    updated_todo = crud.update_personal_projects_todo(db = db, todo_id = todo_id, user_id = user_id, project_id = project_id, todo_to_update = todo)
+
+    if not updated_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo not found or you dont have permission to modify it"
+        )
+    return updated_todo
+
+'''
+@app.put("/users/{user_id}/projects/{project_id}", response_model=schema.Project)
+def update_project(user_id: int, project_id: int, todo:schema.ProjectUpdate, db:Session=Depends(get_db)):
+    updated_todo = crud.update_todo(db = db, todo_id = todo_id, user_id = user_id, todo_to_update = todo)
+
+    if not updated_todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Todo not found or you dont have permission to modify it"
+        )
+    return updated_todo
+
+'''

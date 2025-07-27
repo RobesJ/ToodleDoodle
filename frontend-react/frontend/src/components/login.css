@@ -1,43 +1,92 @@
-/* login.css - Stunning jaw-dropping design */
-
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
-.container {
+.login-container, .register-container {
     display: flex;
-    flex-direction: column;
-    margin: auto;
-    margin-top: 5%;
-    padding: 40px;
-    background: linear-gradient(145deg, #ffffff15, #ffffff05);
-    backdrop-filter: blur(20px);
-    border-radius: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
-    animation: containerFloat 6s ease-in-out infinite;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    gap: 100px;
+    padding: 50px;
 }
 
-.container::before {
-    content: '';
+.brand-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: brandFloat 8s ease-in-out infinite;
+}
+
+.brand-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #91a7ff 50%, 
+        #667eea 75%, 
+        #764ba2 100%);
+    background-size: 300% 300%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+    text-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    animation: gradientShift 4s ease-in-out infinite;
+    position: relative;
+}
+
+.brand-name::before {
+    content: 'CreaDo';
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(
-        from 0deg,
-        transparent,
-        rgba(91, 133, 127, 0.1),
-        transparent,
-        rgba(91, 133, 127, 0.1),
-        transparent
-    );
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.1) 0%, 
+        rgba(118, 75, 162, 0.1) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: blur(20px);
     z-index: -1;
 }
 
+.brand-tagline {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: rgba(102, 126, 234, 0.8);
+    margin-top: 10px;
+    letter-spacing: 2px;
+    opacity: 0.9;
+}
+
+
+.login-page, .register-page{
+    padding: 50px;
+    width: 25%;
+    height:50%;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.container {    
+    padding: 40px;    
+    position: relative;
+    overflow: hidden;
+}
 
 .input {
     height: 60px;
@@ -50,15 +99,14 @@
 .input input {
     width: 100%;
     height: 100%;
-    border: none;
     border-radius: 15px;
     padding: 0 20px;
     font-size: 18px;
     font-family: 'Poppins', sans-serif;
     background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    color: rgba(0, 0, 0, 0.5);;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.6);
     box-sizing: border-box;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -67,7 +115,6 @@
 .input input:focus {
     outline: none;
     background: rgba(255, 255, 255, 0.15);
-    border-color: #5b857f;
     box-shadow: 
         0 0 20px rgba(91, 133, 127, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -75,7 +122,7 @@
 }
 
 .input input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.5);
     font-weight: 300;
 }
 
@@ -86,103 +133,90 @@
 }
 
 h2 {
-    color: #ffffff;
+    color: rgba(0, 0, 0, 0.7);
     font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    font-size: 2.5rem;
+    font-weight: 600;
+    font-size: 2.2rem;
     margin-bottom: 30px;
-    text-shadow: 
-        0 0 10px rgba(91, 133, 127, 0.5),
-        0 0 20px rgba(91, 133, 127, 0.3),
-        0 0 40px rgba(91, 133, 127, 0.1);
-    background: linear-gradient(45deg, #5b857f, #ffffff, #5b857f);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-align: center;
+    position: relative;
+    
 }
 
 .button {
-    margin-top: 20px;
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .button button {
     border-radius: 15px;
-    border: none;
+    border: 1px solid rgba(0, 0, 0, 0.6);
     height: 60px;
     width: 200px;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 800;
     font-family: 'Poppins', sans-serif;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    background: linear-gradient(45deg, #5b857f, #4f7972, #5b857f);
-    background-size: 300% 300%;
-    
-    box-shadow: 
-        0 8px 25px rgba(91, 133, 127, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
     position: relative;
     z-index: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
-
-.button button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    transition: left 0.5s;
-    z-index: -1;
-}
-
 
 .button button:hover {
     transform: translateY(-3px);
+    scale: 1.05;
+    background: rgba(255, 255, 255, 0.15);
     box-shadow: 
-        0 15px 35px rgba(91, 133, 127, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    background-position: 100% 0;
+        0 8px 25px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: rgba(0, 0, 0, 0.7);
+    color: rgba(0, 0, 0, 0.7);
 }
 
 .button button:active {
-    transform: translateY(-1px);
-    box-shadow: 
-        0 5px 15px rgba(91, 133, 127, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
-.button button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.signUp-link{
-    margin-top: 30px;
+/* Fixed signup link positioning and styling */
+.signUp-link {
+    margin-top: 20px;
     text-align: center;
+    font-family: 'Poppins', sans-serif;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 16px;
+    font-weight: 400;
 }
 
-.link-button { 
+.link-button {
     border: none;
-    height: 50px;
-    width: 120px;
-    font-size: 15px;
-    font-weight: 700;
+    height: auto;
+    width: auto;
+    font-size: 16px;
+    font-weight: 600;
     font-family: 'Poppins', sans-serif;
-    color: #ffffff;
+    color: rgba(0, 0, 0, 0.7);
     cursor: pointer;
     background: none;
     z-index: 1;
-    margin-left: 10px;
-    transition: transform 0.2s ease;
-    display: inline-block;
+    margin-left: 5px;
+    transition: all 0.2s ease;
+    display: inline;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(0, 0, 0, 0.3);
 }
 
 .link-button:hover {
-    transform: translateY(-2px);
-    scale: 1.1;
+    transform: none;
+    scale: 1;
+    color: rgba(0, 0, 0, 0.9);
+    text-decoration-color: rgba(0, 0, 0, 0.6);
 }
 
 /* Error and success messages */
