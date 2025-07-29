@@ -40,61 +40,94 @@ def update_user(db:Session, user_to_update:schema.UserUpdate, user_id: int):
     db.refresh(db_user)
     return db_user
 
+def get_delegator(db:Session, user_id: int, team_id: int):
+    delegator = db.query(models.Team_Member).filter(models.Team_Member.team_id == team_id, models.Team_Member.member_role == "admin", models.Team_Member.member_id != user_id).first()
+    return delegator
+
+
 def delete_user(db:Session, user_id: int, delegate: bool):
     db_user = db.query(models.User).filter(models.User.id == user_id, models.User.is_active == True).first()
 
     if not db_user:
         return None
     
-    users_todos    =  db.query(models.Todo).filter(models.Todo.owner_id == user_id, models.Todo.deleted == False).all()
-    users_projects =  db.query(models.Project).filter(models.Project.owner_id == user_id, models.Project.deleted == False).all()
-    users_teams    =  db.query(models.Team).filter(models.Team.owner_id == user_id, models.Team.deleted == False).all()
-    
-    for todo in users_todos:
-        if todo.type == "task":
-            todo.deleted = True
-            todo.deleted_at = datetime.now()
-        elif todo.type == "team":
-            if delegate:
-                pass
-                delegator = db.query(models.Team_Member).filter(models.Team_Member.team_id == todo.team_id, models.Team_Member.member_role == "admin").first()
-                todo.owner_id = delegator.member_id
-                todo.owner = delegator
-            else:
-                todo.deleted = True
-                todo.deleted_at = datetime.now()
-        elif todo.type == "project_team":
-            if delegate:
-                delegator =  db.query(models.Team_Member).filter(models.Team_Member.team_id == todo.team_id, models.Team_Member.member_role == "admin").first()
-                todo.owner_id = delegator.member_id
-                todo.owner = delegator
-            else:
-                todo.deleted = True
-                todo.deleted_at = datetime.now()
+    try:
+        users_todos    =  db.query(models.Todo).filter(models.Todo.owner_id == user_id, models.Todo.deleted == False).all()
+        users_projects =  db.query(models.Project).filter(models.Project.owner_id == user_id, models.Project.deleted == False).all()
+        users_teams    =  db.query(models.Team).filter(models.Team.owner_id == user_id, models.Team.deleted == False).all()
 
-    for project in users_projects:
-        if project.type == "personal":
-            project.deleted_at = datetime.now()
-            project.deleted = True
+
+        if delegate:
+
+            # get a delegator for each team
+            teams_to_delegate = set()
+            missing_delegators = []
+            delegators = {}
+
+            for team in users_teams:
+                teams_to_delegate.add(team.id)
+            
+            for todo in users_todos:
+                if todo.type in ["project", "project_team"] and todo.team_id:
+                    teams_to_delegate.add(todo.team_id)
+
+            for project in users_projects:
+                if project.type == "team" and project.team_id:
+                    teams_to_delegate.add(project.team_id)
+            
+            
+            for team_id in teams_to_delegate:
+                delegator = get_delegator(db = db, user_id= user_id, team_id= team_id)
+                if delegator:
+                    delegators[team_id] = delegator.member_id
+                else:
+                    team = db.query(models.Team).filter(models.Team.id == team_id).first()
+                    missing_delegators.append(team.title)
+
+            if missing_delegators:
+                return {"Error" : f"No admin found for teams: {', '.join(missing_delegators)}. Please assign admins before delegation."}
+            
+
+            for todo in users_todos:
+                if todo.type == "task":
+                    todo.deleted = True
+                    todo.deleted_at = datetime.now()
+                elif todo.type == "team":
+                    todos_delegator = delegators[todo.team_id]
+                    todo.owner_id = todos_delegator
+                elif todo.type == "project_team":
+                    todos_delegator = delegators[todo.team_id]
+                    todo.owner_id = todos_delegator
+
+            for project in users_projects:
+                if project.type == "personal":
+                    project.deleted_at = datetime.now()
+                    project.deleted = True
+                else:
+                    projects_delegator = delegators[project.team_id]
+                    project.owner_id = projects_delegator
+        
+            for team in users_teams:
+                teams_delegator = delegators[team.id]
+                team.owner_id = teams_delegator
+
         else:
-            if delegate:
-                pass
-                delegator = db.query(models.Team_Member).filter(models.Team_Member.team_id == project.team_id, models.Team_Member.member_role == "admin").first()
-                project.owner_id = delegator.member_id
-                project.owner = delegator
-            else:
+            for todo in users_todos:
+                todo.deleted = True
+                todo.deleted_at = datetime.now()
+               
+            for project in users_projects:
                 project.deleted_at = datetime.now()
                 project.deleted = True
-
-    for team in users_teams:
-        if delegate:
-            delegator = db.query(models.Team_Member).filter(models.Team_Member.team_id == team.team_id, models.Team_Member.member_role == "admin").first()
-            team.owner_id = delegator.member_id
-            team.owner = delegator
-        else:
-            team.deleted_at = datetime.now()
-            team.deleted = True
-
+               
+            for team in users_teams:
+                team.deleted_at = datetime.now()
+                team.deleted = True
+    
+    except Exception as e:
+        db.rollback()
+        return e
+    
 
     db_user.is_active = False
     db_user.last_login = datetime.now()
@@ -127,7 +160,7 @@ def create_users_todo(db: Session, todo:schema.TodoCreate, user_id: int):
         actual_hours    = todo.actual_hours,
         started_at = todo.started_at,
         finished_at = todo.finished_at,
-        asignee_id = todo.asignee_id
+        assignee_id = todo.assignee_id
     )
     db.add(db_todo)
     db.commit()
@@ -171,7 +204,7 @@ def create_personal_project(db:Session, project: schema.ProjectCreate, user_id: 
         description = project.description,
         status = project.status,
         due_date = project.due_date,
-        owner_id= user_id,
+        owner_id = user_id,
         estimated_hours = project.estimated_hours,
         actual_hours    = project.actual_hours,
         currency = project.currency,
@@ -235,7 +268,7 @@ def create_personal_projects_todo(db: Session, todo:schema.TodoCreate, user_id: 
         actual_hours    = todo.actual_hours,
         started_at = todo.started_at,
         finished_at = todo.finished_at,
-        asignee_id = todo.asignee_id
+        assignee_id = todo.assignee_id
     )
     db.add(db_todo)
     db.commit()
@@ -263,9 +296,9 @@ def create_team(db:Session, user_id: int, team: schema.TeamCreate, members_id: l
         member_list.append(db.query(models.User).filter(models.User.id == id).first())
 
     db_team = models.Team(
-        title= team.title,
-        description=team.description,
-        owner_id=user_id
+        title = team.title,
+        description =team.description,
+        owner_id =user_id
     )
     db.add(db_team)
     db.commit()
@@ -352,7 +385,7 @@ def create_team_todo(db:Session, user_id: int, team_id: int, todo: schema.TodoCr
         actual_hours    = todo.actual_hours,
         started_at = todo.started_at,
         finished_at = todo.finished_at,
-        asignee_id = todo.asignee_id
+        assignee_id = todo.assignee_id
     )
     
     db.add(db_todo)
@@ -390,7 +423,7 @@ def create_team_todo_in_team_project(db:Session, user_id: int, team_id: int, pro
         actual_hours    = todo.actual_hours,
         started_at = todo.started_at,
         finished_at = todo.finished_at,
-        asignee_id = todo.asignee_id
+        assignee_id = todo.assignee_id
     )
     
     db.add(db_todo)
@@ -455,21 +488,44 @@ def remove_team_members(db: Session, user_id: int, team_id: int,):
     db.commit()
     return "User was removed from team"
 
-def add_project_participants(db: Session, user_id: int, project_id: int):
+def add_project_participants(db: Session, user_id: int, team_id: int, participant_id: int, project_id: int):
+    changer = db.query(models.Team_Member).filter(models.Project_User.project_id == project_id, models.Project_User.participant_id == user_id).first()
+    if not changer:
+        return {"Error" : "Not authorized for this kind of change"}
     user_to_add = models.Project_User(
         project_id = project_id,
-        participant_id = user_id
+        participant_id = participant_id
     )
+    if not user_to_add:
+        return None
+    
     db.add(user_to_add)
     db.commit()
     db.refresh(user_to_add)
     return user_to_add
 
-def remove_project_participants(db: Session, user_id: int, project_id: int):
-    participant_to_delete = db.query(models.Project_User).filter(models.Project_User.participant_id == user_id, models.Project_User.project_id == project_id).first()
+def remove_project_participants(db: Session, user_id: int, participant_id: int, team_id: int, project_id: int):
+    changer = db.query(models.Team_Member).filter(models.Team_Member.team_id == team_id, models.Team_Member.member_id == user_id).first()
+    if changer.member_role != "admin" or not changer:
+        return {"Error" : "Not authorized for this kind of change"}
+    
+    participant_to_delete = db.query(models.Project_User).filter(models.Project_User.participant_id == participant_id, models.Project_User.project_id == project_id).first()
     if not participant_to_delete:
         return None
     
     db.delete(participant_to_delete)
     db.commit()
     return "User was removed from project"
+
+def assign_team_role(db:Session, changer_id: int, user_id:int, team_id: int):
+    # check if the changer is an admin
+    changer = db.query(models.Team_Member).filter(models.Team_Member.team_id == team_id, models.Team_Member.member_id == changer_id).first()
+    if changer.member_role != "admin" or not changer:
+        return {"Error" : "Not authorized for this kind of change"}
+    
+    user_to_change = db.query(models.Team_Member).filter(models.Team_Member.team_id == team_id, models.Team_Member.member_id == user_id).first()
+    user_to_change.member_role = "admin"
+
+    db.commit()
+    db.refresh(user_to_change)
+    return user_to_change

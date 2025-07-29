@@ -13,8 +13,8 @@ class User(Base):
 
     avatar_url = Column(String(500), nullable=True)
     bio = Column(Text, nullable=True)
-    timezone = Column(String(50), default="UTC")
-    notification_preferences = Column(String(255), default="email,in_app")  # JSON-like string
+    timezone = Column(String(10), default="UTC")
+    notification_preferences = Column(String(50), default="email,in_app")  # JSON-like string
     theme_preference = Column(String(20), default="light")  # light, dark, auto
     language = Column(String(10), default="en")
     
@@ -23,7 +23,7 @@ class User(Base):
     last_login = Column(DATETIME, default=func.now()) # deactivation of account if user is not active for three month
 
     todos = relationship("Todo", foreign_keys="Todo.owner_id", back_populates="owner", cascade="save-update") # those created by user
-    asigned_todos = relationship("Todo", foreign_keys="Todo.asignee_id", back_populates="asignee", cascade="save-update")
+    assigned_todos = relationship("Todo", foreign_keys="Todo.assignee_id", back_populates="assignee", cascade="save-update")
     created_projects = relationship("Project", back_populates="owner", cascade="save-update") # those create by user
     created_teams = relationship("Team", back_populates="owner", cascade="save-update")
 
@@ -41,9 +41,9 @@ class Todo(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(50), index=True)
-    description = Column(Text, index=True)
+    description = Column(Text)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    asignee_id = Column(Integer,ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True)
+    assignee_id = Column(Integer,ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True)
     status = Column(String(100), index= True, default="New")
     priority = Column(String(50), index = True, default="Low")
     type = Column(String(50), default="task", nullable=False)
@@ -63,7 +63,7 @@ class Todo(Base):
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"),index = True, nullable=True)
 
     owner = relationship("User", foreign_keys=[owner_id], back_populates="todos")
-    asignee = relationship("User", foreign_keys=[asignee_id], back_populates="asigned_todos")
+    assignee = relationship("User", foreign_keys=[assignee_id], back_populates="assigned_todos")
     project = relationship("Project", back_populates="todos")
     team = relationship("Team", back_populates="todos")
     
@@ -78,7 +78,7 @@ class Project(Base):
     __tablename__ = "projects"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(50), index=True)
-    description = Column(Text, index=True)
+    description = Column(Text)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
     status = Column(String(100), index= True)
     color = Column(String(7), default="#3B82F6")
@@ -123,7 +123,7 @@ class Team(Base):
     __tablename__ = "teams"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(50), index=True, nullable=False)
-    description = Column(Text, index=True, nullable=True)
+    description = Column(Text, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"))
     created_at = Column(DATETIME, index=True, default=func.now())
     deleted_at = Column(DATETIME, index=True, nullable=True)

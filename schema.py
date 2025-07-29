@@ -9,7 +9,7 @@ class TodoBase(BaseModel):
     due_date       : Optional[date] = None
     started_at     : Optional[date] = None
     finished_at    : Optional[date] = None
-    asignee_id     : Optional[int] = None
+    assignee_id     : Optional[int] = None
     priority       : Optional[str] = None
     team_id        : Optional[int] = None
     project_id     : Optional[int] = None
@@ -25,7 +25,7 @@ class TodoCreate(BaseModel):
     due_date       : Optional[date] = None
     started_at     : Optional[date] = None
     finished_at    : Optional[date] = None
-    asignee_id     : Optional[int] = None
+    assignee_id     : Optional[int] = None
     priority       : Optional[str] = None
     team_id        : Optional[int] = None
     project_id     : Optional[int] = None
@@ -41,7 +41,7 @@ class TodoUpdate(TodoBase):
     due_date       : Optional[date] = None
     started_at     : Optional[date] = None
     finished_at    : Optional[date] = None
-    asignee_id     : Optional[int] = None
+    assignee_id     : Optional[int] = None
     priority       : Optional[str] = None
     team_id        : Optional[int] = None
     project_id     : Optional[int] = None
@@ -212,7 +212,7 @@ class User(UserBase):
     id                     : int
     is_active              : bool
     todos                  : List[Todo] = []
-    asigned_todos          : List[Todo] = []
+    assigned_todos         : List[Todo] = []
     timezone               : Optional[str] = "UTC"
     theme_preference       : Optional[str] = "light"  # light, dark, auto
     language               : Optional[str] = "en"
